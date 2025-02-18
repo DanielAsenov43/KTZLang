@@ -1,0 +1,19 @@
+
+START
+# This is a complex program
+NUM  a = 2
+BOOL ab = FALSE # This does stuff
+TXT mytext =  a b
+PRINT  abc de
+         
+a=5
+#2 PRINT [mytext], World!
+#PRINT Hay [a] personas
+[a] PRINT It works!
+END
+
+[
+    ["PRINT", ["Hello"], 2],
+    ["DECLARE", ["A", "5"], 1],
+    ["UPDATE", ["A", "[A + 2]"], 1]
+]

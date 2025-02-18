@@ -1,0 +1,53 @@
+START
+
+# Variables --------------
+NUM A = 5
+BOOL B = TRUE
+TXT C = Hello
+
+# Printing ---------------
+PRINT Welcome!
+2 PRINT It works!
+[A] PRINT Hi!
+PRINT [C], World!
+
+# Calculations (NUM only) ----
+A = [A + 2]
+
+A ++ A 		# A = A + 5
+A--2 		# A = A - 2
+A **2 		# A = A * 2
+A^^3 		# A = A ^ 3
+
+# Text manipulation --------
+B ++ Hola
+
+# Conditionals -----------
+IF B = TRUE DO
+	PRINT Cool!
+ENDIF
+
+IF A = 5 DO
+	A++3
+ELSE
+	A--2
+ENDIF
+
+# Functions --------------
+FUNC myFunc
+	PRINT Awesome!
+	A ++ 2
+ENDFUNC
+
+myFunc
+3 myFunc
+
+# I hope I can add this ----
+FUNC square
+	IN number, number2
+	number^^2
+	OUT number
+ENDFUNC
+
+
+END

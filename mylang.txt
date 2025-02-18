@@ -1,0 +1,65 @@
+This line is considered a comment
+START
+# This line is also considered a comment
+NUM A = 5
+TXT B = Hello
+BOOL C = TRUE
+
+PRINT [B], World!
+3 PRINT Hi
+
+FUNC Calculate
+	IN myNumber, myString
+	3 myNumber = [myNumber ** 2]
+	OUT [myNumber + 1]
+ENDFUNC
+
+2 PRINT Calculate [10, Hello]
+[A] PRINT Nice!
+
+PRINT [A]
+END
+This is also considered a comment
+
+MyFunc() {
+	this.parameters = {
+		"myNumber": None
+		"myString": None
+	}
+	
+	this.return = ["myNumber"]
+	
+	this.code = {
+		"ASSIGN": ["myNumber", "CALC [myNumber ** 2]", 3]
+		"PRINT": ["[myNumber]", 3]
+	}
+	
+	this.run = function(*args) {
+		for arg in args:
+			assign an arg to each parameter
+		parse(this.code)
+	}
+}
+
+functions = {
+	"myFunc": new Function("myNumber", "myString")
+}
+
+{
+	"ASSIGN": ["A", 5]
+	"ASSIGN": ["B", "Hello"]
+	"ASSIGN": ["C", True]
+	"PRINT": ["[B], World!", 1]
+	"PRINT": ["Hi", 3]
+	"PRINT": ["MyFunc", 2]
+	"PRINT": ["Nice!", "[A]"]
+	"PRINT": ["[A]", 1]
+}
+
+1. Declare all functions (Ex.1)
+2. Read and translate the code (Ex.2)
+3. Run all the calculations in the main code & replace
+   all the variables with their respective values (Ex.2)
+4. Run the code
+5. Execute the main code. If a function is encoutered,
+   run the calculations for the function code and execute it.
