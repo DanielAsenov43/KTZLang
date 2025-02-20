@@ -1,19 +1,27 @@
 from errors import Error, ErrorType
+from instruction import Instruction
 from enum import StrEnum
-import re
 
 class Syntax(StrEnum): # Code syntax
     SCRIPT_START = "START"
     SCRIPT_END = "END"
     COMMENT = "#"
+
+    PRINT = "PRINT"
+
     VAR_NUMBER = "NUM"
     VAR_TEXT = "TXT"
     VAR_BOOLEAN = "BOOL"
     VAR_DECLARATION = "="
+
     VAR_BOOLEAN_TRUE = "TRUE"
     VAR_BOOLEAN_FALSE = "FALSE"
-    PRINT = "PRINT"
 
+    VAR_NUM_INCREASE = "+"
+    VAR_NUM_DECREASE = "-"
+    VAR_NUM_MULTIPLY = "*"
+    VAR_NUM_DIVIDE = "/"
+    VAR_NUM_POWER = "^"
 
 class InnerSyntax: # Syntax understood by the machine internally
     EXECUTION_AMOUNT = "_"
@@ -23,56 +31,46 @@ class InnerSyntax: # Syntax understood by the machine internally
     VAR_DECLARE_BOOLEAN = "DECLARE_BOOLEAN" # NUM A = 5
     VAR_UPDATE = "UPDATE" # A = 2
 
-
-'''
-[
-    ["PRINT": ["Text"], 2],
-    ["DECLARE": ["A", "5"], 1],
-    ["DECLARE": ["B", "10"], 1],
-    ["UPDATE": ["A", "Hi"], 1], # Error
-    ["UPDATE": ["A", "[A + 2]"], 1],
-    ["PRINT": ["2 + 2 = [A]"], 3]
-]
-'''
+# =============================================================================================
 
 class SyntaxChecker:
-    def check_line_get_instruction(line: str, syntaxType: str, lineNumber: int) -> list:
-        instruction = None
-        instructionSyntax = None
-        instructionData = []
-        command = InnerSyntax.EXECUTION_AMOUNT.join(line.split(InnerSyntax.EXECUTION_AMOUNT)[1:])
-        amount = line.split(InnerSyntax.EXECUTION_AMOUNT)[0]
-        match(syntaxType):
+    def check_line_get_instruction(line: str, lineNumber: int) -> Instruction:
+        instruction = Instruction()
+        amountIndex = line.find(InnerSyntax.EXECUTION_AMOUNT)
+        amount = line[0:amountIndex]
+        command = line[amountIndex + 1:]
+        commandType = SyntaxChecker.get_command_type(command)
+        match(commandType):
             case Syntax.VAR_NUMBER:
                 instructionData = SyntaxChecker.__check_var_num_declaration(command, lineNumber)
-                instructionSyntax = InnerSyntax.VAR_DECLARE_NUM; amount = 1 # Can only be declared once
+                instruction.set_command(InnerSyntax.VAR_DECLARE_NUM)
+                instruction.set_data(instructionData)
+                amount = 1 # Declarations can only be executed once
+
             case Syntax.VAR_BOOLEAN:
                 instructionData = SyntaxChecker.__check_var_bool_declaration(command, lineNumber)
-                instructionSyntax = InnerSyntax.VAR_DECLARE_BOOLEAN; amount = 1 # Can only be declared once
+                instruction.set_command(InnerSyntax.VAR_DECLARE_BOOLEAN)
+                amount = 1 # Declarations can only be executed once
+
             case Syntax.VAR_TEXT:
                 instructionData = SyntaxChecker.__check_var_text_declaration(command, lineNumber)
-                instructionSyntax = InnerSyntax.VAR_DECLARE_TEXT; amount = 1 # Can only be declared once
+                instruction.set_command(InnerSyntax.VAR_DECLARE_TEXT)
+                amount = 1 # Declarations can only be executed once
+
             case Syntax.PRINT:
                 instructionData = SyntaxChecker.__check_print(command, lineNumber)
-                instructionSyntax = InnerSyntax.PRINT
-            case _:
-                variableUpdate = re.findall(f"\S*\s*{Syntax.VAR_DECLARATION}\s*\S*")[0] # A = 5
-                if(variableUpdate):
-                    match = re.findall(f"\S*\s*{Syntax.VAR_DECLARATION}\s*")[0]
-                    matchIndex = len(match)
-                    match.replace(" ", "")
-                    variableName = match.split(Syntax.VAR_DECLARATION)[0]
-                    value = match + command[matchIndex:]
-                    print(f"Update -> {variableName} -> {value}")
-                else:
-                    print(f"Unknown -> {syntaxType} {command}")
+                instruction.set_command(InnerSyntax.PRINT)
 
-        # ["PRINT", ["Text"], 2]  or  ["DECLARE", ["A", "5"], 1]
-        return [instructionSyntax, instructionData, str(amount)] if instructionSyntax else None
+            case InnerSyntax.VAR_UPDATE:
+                print("VAR_UPDATE -> " + command)
+                pass
+
+        instruction.set_execution_amount(amount)
+        return instruction
     
     # Check if a "variableType" variable is declared correctly (NUM A = 5, BOOL B = TRUE, TXT C = Hi, etc)
     # Returns the string that the variable is assigned, regardless of type, to be checked by the other functions
-    def __check_var_declaration(line: str, variableType: str, lineNumber: int) -> list:
+    def __check_var_declaration(line: str, lineNumber: int) -> list:
         if(Syntax.VAR_DECLARATION not in line): Error.throw(ErrorType.VAR_MISSING_DECLARATION_CHARACTER, lineNumber)
         variableDeclarationIndex = line.find(Syntax.VAR_DECLARATION)
         variableName = line[0:variableDeclarationIndex]
@@ -89,10 +87,12 @@ class SyntaxChecker:
 
     def __check_var_num_declaration(line: str, lineNumber: int) -> list:
         instructionData = SyntaxChecker.__check_var_declaration(line, Syntax.VAR_NUMBER, lineNumber)
+        # TODO
         return instructionData
 
     def __check_var_text_declaration(line: str, lineNumber: int) -> list:
         instructionData = SyntaxChecker.__check_var_declaration(line, Syntax.VAR_TEXT, lineNumber)
+        # TODO
         return instructionData
 
     def __check_var_bool_declaration(line: str, lineNumber: int) -> list:

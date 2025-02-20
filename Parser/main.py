@@ -1,6 +1,7 @@
 from lexer import Lexer
 from parser import Parser
 from errors import Error, ErrorType
+from syntaxUtils import SyntaxUtils
 import os
 
 SUFFIX = "ktz"
@@ -22,7 +23,7 @@ def main():
         Error.throw(ErrorType.FILE_NOT_FOUND)
 
     executingMessage = f"\t--- Executing [{filename}.ktz] ---"
-    endMessage = "\t    --- Program finished ---"
+    endMessage = "\t     --- Program finished ---"
 
     print(executingMessage)
     instructions = lexer.analyze(lines)

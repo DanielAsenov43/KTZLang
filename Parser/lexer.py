@@ -1,6 +1,6 @@
 from syntax import Syntax, SyntaxChecker
 from errors import Error, ErrorType # Shhh
-from extras import Extras
+from extras import Extras, InnerExtras
 
 class Lexer:
     def __init__(self):
@@ -30,8 +30,8 @@ class Lexer:
         # Check for START and END declaration errors
         if(Syntax.SCRIPT_START not in self.lines.values()): Error.throw(ErrorType.MISSING_START) # Check if there's a START statement
         if(Syntax.SCRIPT_END not in self.lines.values()): Error.throw(ErrorType.MISSING_END) # Check if there's an END statement
-        if(self.linelist().count(Syntax.SCRIPT_START) > 1): Error.throw(ErrorType.MULTIPLE_STARTS, Extras.lastIndexOf(self.lines, Syntax.SCRIPT_START)) # Check for multiple START statements
-        if(self.linelist().count(Syntax.SCRIPT_END) > 1): Error.throw(ErrorType.MULTIPLE_ENDS, Extras.lastIndexOf(self.lines, Syntax.SCRIPT_END)) # Check for multiple END statements
+        if(self.linelist().count(Syntax.SCRIPT_START) > 1): Error.throw(ErrorType.MULTIPLE_STARTS, InnerExtras.lastIndexOf(self.lines, Syntax.SCRIPT_START)) # Check for multiple START statements
+        if(self.linelist().count(Syntax.SCRIPT_END) > 1): Error.throw(ErrorType.MULTIPLE_ENDS, InnerExtras.lastIndexOf(self.lines, Syntax.SCRIPT_END)) # Check for multiple END statements
         startIndex = self.linelist().index(Syntax.SCRIPT_START) # Get the start line index
         endIndex = self.linelist().index(Syntax.SCRIPT_END) # Get the end line index
         if(startIndex >= endIndex): Error.throw(ErrorType.END_BEFORE_START, self.linelist().index(Syntax.SCRIPT_START)) # Check their order
@@ -41,12 +41,15 @@ class Lexer:
     
     def __second_sweep(self): # This will check the syntax of every line. Once it's done, it will convert the lines into instructions for the parser to execute
         self.lines = Extras.normalize_execution_times(self.lines) # Normalizes the execution amount ("3 PRINT Hi" -> "3_PRINT Hi", "[a + 2] PRINT Hi" -> "[a+2]_PRINT Hi")
-
+        print("> " + "\n> ".join(self.lines.values()))
+        return
         # These functions remove all unnecessary spaces from every line, following a regex to avoid breaking any strings.
-        self.lines, affectedTextLines = Extras.remove_spaces(self.lines, f"{Syntax.VAR_TEXT}\s*\S*\s*{Syntax.VAR_DECLARATION}\s*") # Check for text variable declarations
+        self.lines, affectedTextLines = Extras.remove_spaces(self.lines, f"{Syntax.VAR_TEXT}\s*\S+\s*{Syntax.VAR_DECLARATION}\s*") # Check for text variable declarations
         self.lines, affectedPrintLines = Extras.remove_spaces(self.lines, f"{Syntax.PRINT}\s*") # Check for prints
-        protectedLines = affectedTextLines + affectedPrintLines # List of line indices that mustn't be changed when removing all the remaining spaces
+        self.lines, affectedUpdateLines = Extras.remove_update_spaces(self.lines, f"\S+\s*{Syntax.VAR_DECLARATION}\s*\S+") # Check for variable assignment
+        protectedLines = affectedTextLines + affectedPrintLines + affectedUpdateLines # List of line indices that mustn't be changed when removing all the remaining spaces
         self.lines = Extras.remove_remaining_spaces(self.lines, protectedLines) # Remove the spaces from every line whose index isn't in the list
+        print(f"Text: {affectedTextLines}, Print: {affectedPrintLines}, Update: {affectedUpdateLines}")
         
         self.lines = dict(sorted(self.lines.items())) # Sort the lines by line number (key)
         self.instructions = Extras.convert_to_instructions(self.lines) # Convert the lines to instructions. It sends every line to the SyntaxChecker and returns a list.
