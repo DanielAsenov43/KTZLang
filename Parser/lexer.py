@@ -13,7 +13,7 @@ class Lexer:
         self.lines = self.__convert_lines_to_dict(lines)
         self.__first_sweep() # Remove all unnecessary lines, spaces, tabs, comments and lines before START and after END, and check for basic syntax problems.
         self.__second_sweep() # Convert everything into a list of instructions [["DECLARE_NUM", ["A", 5], 1], ["PRINT", ["Hello"], 4], ...]
-        #return self.instructions # Return the instructions so the parser can execute them
+        return self.instructions # Return the instructions so the parser can execute them
     
     def __convert_lines_to_dict(self, lines: str) -> dict: # Converts ["line1", "line2"] to {1: "line1", 2: "line2"}, starting from 1
         return {i + 1:lines[i] for i in range(len(lines))}
@@ -57,12 +57,4 @@ class Lexer:
         
         self.lines = dict(sorted(self.lines.items())) # Sort the lines by line number (key)
         self.instructions = Extras.convert_to_instructions(self.lines) # Convert the lines to instructions. It sends every line to the SyntaxChecker and returns a list.
-        input("\n".join([str(x) for x in self.instructions]))
-        
-        
-
-    
-
-
-
-        
+        print("\n".join([str(x) for x in self.instructions]))

@@ -38,7 +38,7 @@ class SyntaxChecker:
         from instruction import Instruction # This is necessary to avoid circular imports
         from syntaxUtils import SyntaxUtils
 
-        instruction = Instruction()
+        instruction = Instruction(lineNumber)
         amountIndex = line.find(InnerSyntax.EXECUTION_AMOUNT)
         amount = line[0:amountIndex]
         command = line[amountIndex + 1:]
@@ -65,8 +65,9 @@ class SyntaxChecker:
                 instruction.set_command(InnerSyntax.PRINT)
 
             case InnerSyntax.VAR_UPDATE:
-                print("VAR_UPDATE -> " + command)
-                instructionData = []
+                instructionData = SyntaxChecker.__check_var_update(command, lineNumber)
+                instruction.set_command(InnerSyntax.VAR_UPDATE)
+                amount = 1
                 pass
         
         instruction.set_data(instructionData)
@@ -103,3 +104,12 @@ class SyntaxChecker:
     def __check_print(line: str, lineNumber: int) -> list:
         value = line[len(Syntax.PRINT):]
         return [value]
+    
+    def __check_var_update(line: str, lineNumber: int) -> list: # a = 2, a++2, a^^2, ...
+        variableDeclarationIndex = line.find(Syntax.VAR_DECLARATION) # "=" sign
+        if(variableDeclarationIndex == 1):
+            # TODO check other types of updates (++, --, ...)
+            pass
+        variableName = line[0:variableDeclarationIndex] # "a"
+        variableValue = line[variableDeclarationIndex+1:] # "2
+        return [variableName, variableValue]
