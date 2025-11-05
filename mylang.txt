@@ -21,6 +21,7 @@ PRINT [A]
 END
 This is also considered a comment
 
+
 MyFunc() {
 	this.parameters = {
 		"myNumber": None
@@ -29,10 +30,7 @@ MyFunc() {
 	
 	this.return = ["myNumber"]
 	
-	this.code = {
-		"ASSIGN": ["myNumber", "CALC [myNumber ** 2]", 3]
-		"PRINT": ["[myNumber]", 3]
-	}
+	this.code = [Instruction1, Instruction2, ...]
 	
 	this.run = function(*args) {
 		for arg in args:

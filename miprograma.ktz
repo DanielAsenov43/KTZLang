@@ -1,12 +1,15 @@
+Hola
 START
 
-NUM  a = 2
-BOOL ab = FALSE
-TXT mytext =  a b
-PRINT  abc de
-        
-a=2
-2  a++2
-mytext = Hello
-[a] PRINT It works!
+2 NUM      {a = 5  
+NUM b =4
+  BOOL ab = FALSE
+ TXT mytext =  a b
+  PRINT  abc de
+
+a= 10
+#2  a++2
+ #mytext = Hello
+# [a] PRINT It works!
 END
+Adios2

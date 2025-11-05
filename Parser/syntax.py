@@ -1,6 +1,6 @@
 from errors import Error, ErrorType
-from instruction import Instruction
 from enum import StrEnum
+import re
 
 class Syntax(StrEnum): # Code syntax
     SCRIPT_START = "START"
@@ -34,26 +34,29 @@ class InnerSyntax: # Syntax understood by the machine internally
 # =============================================================================================
 
 class SyntaxChecker:
-    def check_line_get_instruction(line: str, lineNumber: int) -> Instruction:
+    def check_line_get_instruction(line: str, lineNumber: int): # Returns an Instruction object
+        from instruction import Instruction # This is necessary to avoid circular imports
+        from syntaxUtils import SyntaxUtils
+
         instruction = Instruction()
         amountIndex = line.find(InnerSyntax.EXECUTION_AMOUNT)
         amount = line[0:amountIndex]
         command = line[amountIndex + 1:]
-        commandType = SyntaxChecker.get_command_type(command)
+        commandType = SyntaxUtils.get_command_type(command)
+        
         match(commandType):
             case Syntax.VAR_NUMBER:
-                instructionData = SyntaxChecker.__check_var_num_declaration(command, lineNumber)
+                instructionData = SyntaxChecker.__check_var_declaration(command, Syntax.VAR_NUMBER, lineNumber)
                 instruction.set_command(InnerSyntax.VAR_DECLARE_NUM)
-                instruction.set_data(instructionData)
                 amount = 1 # Declarations can only be executed once
 
             case Syntax.VAR_BOOLEAN:
-                instructionData = SyntaxChecker.__check_var_bool_declaration(command, lineNumber)
+                instructionData = SyntaxChecker.__check_var_declaration(command, Syntax.VAR_BOOLEAN, lineNumber)
                 instruction.set_command(InnerSyntax.VAR_DECLARE_BOOLEAN)
                 amount = 1 # Declarations can only be executed once
 
             case Syntax.VAR_TEXT:
-                instructionData = SyntaxChecker.__check_var_text_declaration(command, lineNumber)
+                instructionData = SyntaxChecker.__check_var_declaration(command, Syntax.VAR_TEXT, lineNumber)
                 instruction.set_command(InnerSyntax.VAR_DECLARE_TEXT)
                 amount = 1 # Declarations can only be executed once
 
@@ -63,46 +66,40 @@ class SyntaxChecker:
 
             case InnerSyntax.VAR_UPDATE:
                 print("VAR_UPDATE -> " + command)
+                instructionData = []
                 pass
-
+        
+        instruction.set_data(instructionData)
         instruction.set_execution_amount(amount)
         return instruction
     
-    # Check if a "variableType" variable is declared correctly (NUM A = 5, BOOL B = TRUE, TXT C = Hi, etc)
-    # Returns the string that the variable is assigned, regardless of type, to be checked by the other functions
-    def __check_var_declaration(line: str, lineNumber: int) -> list:
-        if(Syntax.VAR_DECLARATION not in line): Error.throw(ErrorType.VAR_MISSING_DECLARATION_CHARACTER, lineNumber)
-        variableDeclarationIndex = line.find(Syntax.VAR_DECLARATION)
-        variableName = line[0:variableDeclarationIndex]
-        variableValue = line[variableDeclarationIndex+1:]
-        #print(f"Declared {variableType} variable: '{variableName}' -> '{variableValue}'")
-        if(len(variableName) <= 0): Error.throw(ErrorType.VAR_MISSING_NAME, lineNumber)
-        if(len(variableValue) <= 0): Error.throw(ErrorType.VAR_MISSING_VALUE, lineNumber)
+    def __check_valid_variable_name(name: str, lineNumber: int):
+        from syntaxUtils import SyntaxUtils
+        # 1. The variable name can't be empty (eg. "NUM = 2")
+        if(len(name) <= 0): Error.throw(ErrorType.VAR_MISSING_NAME, lineNumber)
+        # 2. The variable name can't be a number (eg. "NUM 1 = 2")
         try:
-            variableName = int(variableName)
+            name = float(name)
             Error.throw(ErrorType.VAR_NAME_IS_A_NUMBER, lineNumber)
-        except ValueError:
-            return [variableName, variableValue]
-        
+        except ValueError: pass
+        # 3. The variable name can't be a built-in syntax structure/command (eg. "TXT PRINT = Hi")
+        # This also checks for (+, -, *, /, ^, ...). Not ideal but it works for now.
+        if(SyntaxUtils.is_regular_command(name)): Error.throw(ErrorType.VAR_NAME_HAS_BUILT_IN_SYNTAX, lineNumber)
+        if(re.findall(f"!({SyntaxUtils.get_variable_name_regex()})", name)):
+            Error.throw(ErrorType.VAR_NAME_HAS_INVALID_CHARACTER, lineNumber, "{NAME}", name)
 
-    def __check_var_num_declaration(line: str, lineNumber: int) -> list:
-        instructionData = SyntaxChecker.__check_var_declaration(line, Syntax.VAR_NUMBER, lineNumber)
-        # TODO
-        return instructionData
+    # Check if a "variableType" variable is declared correctly (NUM A = 5, BOOL B = TRUE, TXT C = Hi, etc)
+    # Returns the variable type concatenated to the variable name, 
+    def __check_var_declaration(line: str, variableType: str, lineNumber: int) -> list:
+        if(Syntax.VAR_DECLARATION not in line): Error.throw(ErrorType.VAR_MISSING_DECLARATION_CHARACTER, lineNumber) # missing an "=" sign
+        variableDeclarationIndex = line.find(Syntax.VAR_DECLARATION) # "=" sign
+        variableName = line[len(variableType):variableDeclarationIndex] # "a"
+        variableValue = line[variableDeclarationIndex+1:] # "2"
 
-    def __check_var_text_declaration(line: str, lineNumber: int) -> list:
-        instructionData = SyntaxChecker.__check_var_declaration(line, Syntax.VAR_TEXT, lineNumber)
-        # TODO
-        return instructionData
-
-    def __check_var_bool_declaration(line: str, lineNumber: int) -> list:
-        instructionData = SyntaxChecker.__check_var_declaration(line, Syntax.VAR_BOOLEAN, lineNumber)
-        variableName = line.split(Syntax.VAR_DECLARATION)[0]
-        match(instructionData[1]):
-            case Syntax.VAR_BOOLEAN_TRUE: instructionData = [variableName, True]
-            case Syntax.VAR_BOOLEAN_FALSE: instructionData = [variableName, False]
-            case _: Error.throw(ErrorType.VAR_BOOLEAN_INVALID_VALUE.replace("[VAR_VALUE]", instructionData[1]), lineNumber)
-        return instructionData
+        SyntaxChecker.__check_valid_variable_name(variableName, lineNumber)
+        if(len(variableValue) <= 0): Error.throw(ErrorType.VAR_MISSING_VALUE, lineNumber)
+        return [variableName, variableValue]
     
     def __check_print(line: str, lineNumber: int) -> list:
-        return [line]
+        value = line[len(Syntax.PRINT):]
+        return [value]

@@ -1,3 +1,5 @@
+import sys
+
 class ErrorType:
     # General
     FILE_NOT_FOUND = "File not found"
@@ -10,6 +12,9 @@ class ErrorType:
     # General variable errors
     VAR_MISSING_NAME = "The variable must have a name"
     VAR_NAME_IS_A_NUMBER = "The variable name must not be a number"
+    VAR_NAME_HAS_BUILT_IN_SYNTAX = "The variable name must not contain any operators or built-in syntax"
+    VAR_NAME_HAS_OPERATOR = "The variable name must not contain operators"
+    VAR_NAME_HAS_INVALID_CHARACTER = "The variable name \"{NAME}\" contains an invalid character"
     VAR_MISSING_DECLARATION_CHARACTER = "Missing '=' syntax when declaring a variable"
     VAR_MISSING_VALUE = "The variable must have a value"
 
@@ -20,9 +25,9 @@ class ErrorType:
 PREFIX = "[!] ERROR: "
 LINE_NUMBER = " [LINE {LINE-NUMBER}]"
 class Error:
-    def throw(errorType: ErrorType, *lineIndex):
-        if(not lineIndex): print(PREFIX + errorType)
-        else: print(PREFIX + errorType + LINE_NUMBER.replace("{LINE-NUMBER}", str(lineIndex[0])))
-        exit(1)
+    def throw(errorType: ErrorType, lineNumber, find=None, replace=None):
+        if(find and replace): errorType = errorType.replace(find, replace)
+        print(PREFIX + errorType + LINE_NUMBER.replace("{LINE-NUMBER}", str(lineNumber)))
+        sys.exit(0)
 
 

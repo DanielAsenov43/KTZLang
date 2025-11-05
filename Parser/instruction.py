@@ -1,8 +1,11 @@
+from syntax import Syntax, InnerSyntax
+
 class Instruction:
     def __init__(self):
-        self.command: str = None
-        self.data: list = None
-        self.executionAmount: str = None
+        # ["PRINT", ["Hello"], 2] or ["DECLARE_NUM", ["A", 2], 1]
+        self.command: str = None # "PRINT", "DECLARE_NUM", ...
+        self.data: list = None # ["Hello"], ["A", 2], ...
+        self.executionAmount: str = None # 2, 1, ...
 
     # Getters
     def get_command(self) -> str: return self.command
@@ -16,4 +19,4 @@ class Instruction:
 
     # toString()
     def __repr__(self):
-        return f"[{self.command} [{self.data}] x{self.executionAmount}"
+        return f"Inst: ({self.command}: {self.data} x{self.executionAmount})"

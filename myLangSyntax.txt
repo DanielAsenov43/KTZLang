@@ -23,11 +23,11 @@ A^^3 		# A = A ^ 3
 B ++ Hola
 
 # Conditionals -----------
-IF B = TRUE DO
+IF [B = TRUE] DO # Create a conditional class, just like a function (condition, code, ...)
 	PRINT Cool!
 ENDIF
 
-IF A = 5 DO
+IF [A = 5] DO
 	A++3
 ELSE
 	A--2
@@ -44,9 +44,9 @@ myFunc
 
 # I hope I can add this ----
 FUNC square
-	IN number, number2
+	IN number, number2 # Parameters
 	number^^2
-	OUT number
+	OUT number # Return value
 ENDFUNC
 
 
