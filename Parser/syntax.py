@@ -39,6 +39,7 @@ class SyntaxChecker:
         from syntaxUtils import SyntaxUtils
 
         instruction = Instruction(lineNumber)
+        instructionData = None
         amountIndex = line.find(InnerSyntax.EXECUTION_AMOUNT)
         amount = line[0:amountIndex]
         command = line[amountIndex + 1:]
@@ -67,8 +68,9 @@ class SyntaxChecker:
             case InnerSyntax.VAR_UPDATE:
                 instructionData = SyntaxChecker.__check_var_update(command, lineNumber)
                 instruction.set_command(InnerSyntax.VAR_UPDATE)
-                amount = 1
-                pass
+            
+            case _:
+                Error.throw(ErrorType.UNKNOWN_COMMAND, lineNumber)
         
         instruction.set_data(instructionData)
         instruction.set_execution_amount(amount)
@@ -106,10 +108,20 @@ class SyntaxChecker:
         return [value]
     
     def __check_var_update(line: str, lineNumber: int) -> list: # a = 2, a++2, a^^2, ...
+        from syntaxUtils import SyntaxUtils
         variableDeclarationIndex = line.find(Syntax.VAR_DECLARATION) # "=" sign
-        if(variableDeclarationIndex == 1):
-            # TODO check other types of updates (++, --, ...)
-            pass
-        variableName = line[0:variableDeclarationIndex] # "a"
-        variableValue = line[variableDeclarationIndex+1:] # "2
+        operators = SyntaxUtils.get_number_operators()
+        variableName = None
+        if(variableDeclarationIndex >= 0): # Variable update: a = 2
+            variableName = line[0:variableDeclarationIndex]
+            variableValue = line[variableDeclarationIndex+1:]
+        else:
+            for operator in operators:
+                if(str(operator) * 2 in line):
+                    variableOperatorIndex = line.find(operator)
+                    variableName = line[0:variableOperatorIndex]
+                    variableValue = f"[{variableName} {operator} {line[variableOperatorIndex+2:]}]"
+                    break
+        # TODO can't catch the error on line 12
+        if(variableName == None): Error.throw(ErrorType.VAR_UPDATE_INVALID_OPERATOR, lineNumber, "{OPERATOR}", operator)
         return [variableName, variableValue]

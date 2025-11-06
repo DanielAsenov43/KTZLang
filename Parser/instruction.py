@@ -21,4 +21,4 @@ class Instruction:
 
     # toString()
     def __repr__(self):
-        return f"Inst: ({self.command}: {self.data} x{self.executionAmount} [Line {self.lineNumber}])"
+        return f"Instruction({self.command}: {self.data} x{self.executionAmount} [Line {self.lineNumber}])"

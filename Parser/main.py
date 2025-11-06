@@ -27,7 +27,7 @@ def main():
 
     print(executingMessage)
     instructions = lexer.analyze(lines)
-    #parser.execute(instructions)
+    parser.execute(instructions)
     print(endMessage)
 
 if(__name__ == "__main__"):
