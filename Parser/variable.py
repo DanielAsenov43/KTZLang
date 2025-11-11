@@ -14,5 +14,4 @@ class Variable:
     def set_value(self, value: any): self.variableValue = value
 
     def __repr__(self) -> str:
-        value = f"\"{self.variableValue}\"" if(self.get_type() == Syntax.VAR_TEXT) else self.variableValue
-        return f"Variable({self.variableType} {self.variableName} = {value})"
+        return f"Variable({self.variableType} {self.variableName} = \"{self.variableValue}\")"

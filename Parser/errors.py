@@ -23,6 +23,7 @@ class ErrorType:
     VAR_MISSING_VALUE = "The variable must have a value"
 
     VAR_REDECLARATION = "The variable \"{VAR_NAME}\" has already been declared"
+    VAR_UPDATE_UNDECLARED = "The variable \"{VAR_NAME}\" has not been declared"
 
     # Boolean variables
     VAR_BOOLEAN_INVALID_VALUE = "The boolean variable must be TRUE or FALSE (not \"{VAR_VALUE}\")" # Circular import, cant use Syntax.VAR_BOOLEAN_TRUE

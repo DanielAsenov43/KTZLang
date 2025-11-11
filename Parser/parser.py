@@ -11,26 +11,36 @@ class Parser:
     
     def execute(self, instructions: list):
         self.instructions = instructions
-        for instruction in instructions:
-            match(instruction.get_command()):
+        print("\n".join([str(x) for x in self.instructions]))
+        '''for instruction in instructions:
+            for i in range(0, instruction.get_execution_amount()):
+                match(instruction.get_command()):
 
-                # Variable declarations
-                case InnerSyntax.VAR_DECLARE_NUM: self.__declare_new_variable(instruction, Syntax.VAR_NUMBER)
-                case InnerSyntax.VAR_DECLARE_TEXT: self.__declare_new_variable(instruction, Syntax.VAR_TEXT)
-                case InnerSyntax.VAR_DECLARE_BOOLEAN: self.__declare_new_variable(instruction, Syntax.VAR_BOOLEAN)
-                
-                # Variable updates
-                case InnerSyntax.VAR_UPDATE:
-                    updatedVarName = instruction.get_data()[0]
-                    updatedVarValue = instruction.get_data()[1]
+                    # Variable declarations
+                    case InnerSyntax.VAR_DECLARE_NUM: self.__declare_new_variable(instruction, Syntax.VAR_NUMBER)
+                    case InnerSyntax.VAR_DECLARE_TEXT: self.__declare_new_variable(instruction, Syntax.VAR_TEXT)
+                    case InnerSyntax.VAR_DECLARE_BOOLEAN: self.__declare_new_variable(instruction, Syntax.VAR_BOOLEAN)
+                    
+                    # Variable updates
+                    case InnerSyntax.VAR_UPDATE:
+                        updatedVarName = instruction.get_data()[0]
+                        updatedVarValue = instruction.get_data()[1]
+                        globalVarNames = [var.get_name() for var in self.globalVariables]
+                        if(updatedVarName not in globalVarNames):
+                            Error.throw(ErrorType.VAR_UPDATE_UNDECLARED, instruction.get_line_number(), "{VAR_NAME}", updatedVarName)
+                        else:
+                            for variable in self.globalVariables:
+                                if(variable.get_name() == updatedVarName):
+                                    print(f"UPDATE: {updatedVarName}: \"{variable.get_value()}\" -> \"{updatedVarValue}\"")
+                                    variable.set_value(updatedVarValue)
 
-                case InnerSyntax.PRINT:
-                    content = instruction.get_data()[0]
-                    if("[" in content or "]" in content):
-                        # TODO make the PRINT [a] work (probably recursively)
-                        pass
-                case _:
-                    Error.throw(ErrorType.UNKNOWN_INSTRUCTION_TYPE, instruction.get_line_number())
+                    case InnerSyntax.PRINT:
+                        content = instruction.get_data()[0]
+                        if("[" in content or "]" in content):
+                            # TODO make the PRINT [a] work (probably recursively)
+                            pass
+                    case _:
+                        Error.throw(ErrorType.UNKNOWN_INSTRUCTION_TYPE, instruction.get_line_number())
         print("\n".join([str(x) for x in self.globalVariables]))
 
     def __declare_new_variable(self, instruction: Instruction, variableType: Syntax):
@@ -39,4 +49,5 @@ class Parser:
         for globalVariable in self.globalVariables:
             if(globalVariable.get_name() == varName): Error.throw(ErrorType.VAR_REDECLARATION)
         variable = Variable(variableType, varName, varValue)
-        self.globalVariables.append(variable)
+        print(f"DECLARATION: {varName} = \"{varValue}\"")
+        self.globalVariables.append(variable)'''

@@ -25,6 +25,7 @@ class Syntax(StrEnum): # Code syntax
 
 class InnerSyntax: # Syntax understood by the machine internally
     EXECUTION_AMOUNT = "_"
+    OPERATE = "OPERATE" # Instruction type
     PRINT = "PRINT" # PRINT Hello, World!
     VAR_DECLARE_NUM = "DECLARE_NUM" # NUM A = 5
     VAR_DECLARE_TEXT = "DECLARE_TEXT" # NUM A = 5
@@ -72,9 +73,26 @@ class SyntaxChecker:
             case _:
                 Error.throw(ErrorType.UNKNOWN_COMMAND, lineNumber)
         
+        dataInstruction = SyntaxChecker.__create_operation_instruction(lineNumber, instructionData[-1])
+        executionAmountInstruction = SyntaxChecker.__create_operation_instruction(lineNumber, amount)
+
+        instructionData[-1] = dataInstruction
+        executionAmount = executionAmountInstruction
+
         instruction.set_data(instructionData)
-        instruction.set_execution_amount(amount)
+        instruction.set_execution_amount(executionAmount)
         return instruction
+    
+    def __create_operation_instruction(lineNumber, value):
+        from instruction import Instruction
+        try:
+            return str(int(value))
+        except ValueError:
+            instruction = Instruction(lineNumber)
+            instruction.set_command(InnerSyntax.OPERATE)
+            instruction.set_data([value])
+            instruction.set_execution_amount(1)
+            return instruction
     
     def __check_valid_variable_name(name: str, lineNumber: int):
         from syntaxUtils import SyntaxUtils

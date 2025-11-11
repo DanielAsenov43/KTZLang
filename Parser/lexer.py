@@ -57,4 +57,4 @@ class Lexer:
         
         self.lines = dict(sorted(self.lines.items())) # Sort the lines by line number (key)
         self.instructions = Extras.convert_to_instructions(self.lines) # Convert the lines to instructions. It sends every line to the SyntaxChecker and returns a list.
-        print("\n".join([str(x) for x in self.instructions]))
+        #input("\n".join([str(x) for x in self.lines.values()]))

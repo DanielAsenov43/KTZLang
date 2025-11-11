@@ -1,7 +1,7 @@
 START
 
 2 NUM      a = 5  
-NUM b =4
+NUM b =[a+ 1]
   BOOL ab = FALSE
  TXT mytext =  a b
   PRINT  abc de
